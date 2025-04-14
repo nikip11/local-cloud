@@ -1,0 +1,56 @@
+# Immich stack
+  redis:
+    image: redis:6
+    container_name: immich_redis
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:14
+    container_name: immich_postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: immich
+    volumes:
+      - ./immich/postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  immich_server:
+    image: ghcr.io/immich-app/immich-server:release
+    container_name: immich_server
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      DB_HOSTNAME: postgres
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE_NAME: immich
+      REDIS_HOSTNAME: redis
+      IMMICH_MACHINE_LEARNING: 1
+    volumes:
+      - ./immich/library:/usr/src/app/upload
+    ports:
+      - "2283:3001"
+    restart: unless-stopped
+
+  immich_microservices:
+    image: ghcr.io/immich-app/immich-microservices:release
+    container_name: immich_microservices
+    depends_on:
+      - redis
+      - postgres
+    environment:
+      DB_HOSTNAME: postgres
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE_NAME: immich
+      REDIS_HOSTNAME: redis
+    volumes:
+      - ./immich/library:/usr/src/app/upload
+    restart: unless-stopped
+
+  immich_machine_learning:
+    image: ghcr.io/immich-app/immich-machine-learning:release
+    container_name: immich_ml
+    restart: unless-stopped
