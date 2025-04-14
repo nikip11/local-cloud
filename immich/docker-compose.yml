@@ -1,4 +1,5 @@
-# Immich stack
+services:
+  # Immich stack
   redis:
     image: redis:6
     container_name: immich_redis
