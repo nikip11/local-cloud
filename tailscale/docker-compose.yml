@@ -1,0 +1,17 @@
+
+services:
+  tailscale:
+    image: tailscale/tailscale
+    container_name: tailscale
+    hostname: local-mongo  # Esto aparecerá como nombre en el panel de Tailscale
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: "host"
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_EXTRA_ARGS=--advertise-tags=tag:mongodb
+    volumes:
+      - /var/lib/tailscale:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    restart: unless-stopped
